@@ -1,0 +1,38 @@
+<template>
+    <div class="slds-p-around_medium">
+        <template if:true={isLoading}>
+            <div class="progress-container">
+                <p class="slds-text-heading_small">Processing... Please wait.</p>
+                <div class="progress-display">
+                    <p class="slds-text-body_small">{progressPercentage}% Completed</p>
+                    <!-- Aligning the loader to the right -->
+                    <lightning-spinner alternative-text="Loading" size="small" class="progress-loader">
+                    </lightning-spinner>
+                </div>
+            </div>
+        </template>
+
+        <template if:true={isJobCompleted}>
+            <div class="batch-job-completion">
+                <p class="slds-text-heading_small">Batch Job Completed Successfully!</p>
+                <p>Total Number Of Batch Processed: {totalBatch}</p>
+                <p>Status: {jobStatus}</p>
+                <p>Success Batch: {successCount}</p>
+                <p>Failed Batch: {failedCount}</p>
+                <br>
+                <p>Total Number Of Records Processed: {totalRecordCount}</p>
+                <p>Success Records Count : {successRecordCount}</p>
+                <p>Failed Records Count : {failedRecordCount}</p>
+
+                <div class="button-container slds-m-top_large">
+                    <button class="slds-button slds-button_neutral" onclick={handleDownload} data-type="success">
+                        Download Success Records
+                    </button>
+                    <button class="slds-button slds-button_destructive" onclick={handleDownload} data-type="failed">
+                        Download Failed Records
+                    </button>
+                </div>
+            </div>
+        </template>
+    </div>
+</template>

@@ -1,0 +1,42 @@
+.batch-job-completion {
+    	text-align: center;
+    	margin-top: 20px;
+    }
+
+    .batch-job-completion p {
+    	margin: 10px 0;
+    }
+
+    .button-container {
+    	display: flex;
+    	justify-content: center;
+    	gap: 15px;
+    	margin-top: 20px;
+    }
+
+    .slds-button {
+    	min-width: 150px;
+    }
+/* Align the percentage and spinner side by side */
+.progress-display {
+    display: flex;
+    justify-content: space-between; /* This ensures the text and spinner are spaced out */
+    align-items: center; /* Vertically align the items */
+}
+
+/* Optional: Style the percentage text */
+.progress-container .slds-text-body_small {
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+/* Prevent background blurring when loader is visible */
+.progress-container {
+    position: relative;
+}
+
+/* Ensure the loader is positioned to the right */
+.progress-loader {
+    position: absolute;
+    right: 0;
+}

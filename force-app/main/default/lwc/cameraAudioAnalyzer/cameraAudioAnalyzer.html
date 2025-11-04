@@ -1,0 +1,23 @@
+<template>
+    <lightning-card title="AI Camera & Audio Analyzer">
+        <lightning-tabset>
+            <!-- 🎙️ Tab 1: Speech to Text -->
+            <lightning-tab label="Speech to Text">
+                <div class="slds-p-around_medium">
+                    <lightning-button label="Start Listening" variant="brand" onclick={handleClick}></lightning-button>
+                    <lightning-button label="Stop" variant="neutral" onclick={handleClickToStop}></lightning-button>
+                    <p class="slds-m-top_medium"><strong>Transcript:</strong></p>
+                    <div class="slds-box slds-theme_default">{transcript}</div>
+                </div>
+            </lightning-tab>
+
+            <!-- 😊 Tab 2: Emotion Detector -->
+            <lightning-tab label="Emotion Detection">
+                <div class="slds-p-around_medium">
+                    <video id="videoElement" autoplay playsinline width="300" height="220"></video>
+                    <p class="slds-m-top_medium"><strong>Detected Emotion:</strong> {emoji}</p>
+                </div>
+            </lightning-tab>
+        </lightning-tabset>
+    </lightning-card>
+</template>

@@ -1,0 +1,33 @@
+<template>
+                <template if:false={jobIdToReturnTrue}>
+
+    <div class="slds-card slds-m-around_small slds-box slds-theme_default"
+        style="background-color:#0176D3;width:50%;align-content: center;margin-right:auto;margin-left:auto;">
+        <div class="slds-card__body">
+
+            <template if:true={messageVisible}>
+                <div class={messageClass}>
+                    <lightning-icon icon-name={iconName} alternative-text="Message" size="small"></lightning-icon>
+                    <span>{message}</span>
+                </div>
+            </template>
+                <div class="slds-grid slds-grid_vertical-align-center slds-grid_align-center slds-m-around_small">
+                    <lightning-button label="Click To Download Sample .csv..." onclick={handleDownload}
+                        class="slds-m-right_small">
+                    </lightning-button>
+
+                    <lightning-input variant="label-hidden" type="file" accept={acceptedFormats}
+                        onchange={handleInputChange}>
+                    </lightning-input>
+                </div>
+        </div>
+
+    </div>
+                </template>
+
+        <template if:true={jobIdToReturnTrue}>
+            <c-object-uploading-component-progressbar job-id={jobIdToReturn}></c-object-uploading-component-progressbar>
+        </template>
+
+    <!-- Conditional rendering for the child component -->
+</template>
