@@ -25,7 +25,7 @@ jobs:
 
       - name: 'Install sfdx-git-delta'
         run: |
-          echo y | sf plugins install sfdx-git-delta
+          sf plugins install sfdx-git-delta --force
           sf plugins
 
             - name: "Create delta packages for new, modified or deleted metadata"
