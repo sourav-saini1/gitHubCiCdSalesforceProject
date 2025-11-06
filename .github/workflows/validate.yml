@@ -28,15 +28,10 @@ jobs:
           echo y | sf plugins install sfdx-git-delta
           sf plugins
 
-      - name: 'Generate delta package (only changed metadata)'
-        run: |
-          mkdir changed-sources
-          sf sgd:source:delta \
-            --to "HEAD" \
-            --from "origin/main" \
-            --output "changed-sources/" \
-            --generate-delta \
-            --source "force-app/"
+            - name: "Create delta packages for new, modified or deleted metadata"
+              run: |
+                  mkdir changed-sources
+                  sf sgd:source:delta --to "HEAD" --from "HEAD^" --output changed-sources/ --generate-delta --source force-app/
           
           echo "✅ Delta package created:"
           ls -R changed-sources/package || echo "⚠️ No package.xml found."
@@ -52,3 +47,4 @@ jobs:
           else
             echo "✅ No Salesforce changes detected, skipping validation."
           fi
+
