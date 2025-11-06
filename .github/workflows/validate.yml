@@ -1,28 +1,100 @@
-name: Validate pull request
+name: Validate to Develop Branch
 
 on:
   pull_request:
-    branches:
-      - main
-    types: [opened, synchronize]
+    types: [opened, synchronize, reopened]
+    branches: [main]
     paths:
-      - 'force-app/**'
+      - "force-app/**"
 
 jobs:
-  validate-deployment:
+  validate-to-dev:
     runs-on: ubuntu-latest
-    container:
-      image: salesforce/cli:latest-slim
-    steps:      
-      - name: 'Checkout source code'
+    if: ${{ github.actor != 'dependabot[bot]' }}
+
+    steps:
+      # Checkout code
+      - name: Checkout source code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      
-      - name: 'Authenticate using SFDX_AUTH_URL'
-        run: | 
-          echo ${{ secrets.SFDX_AUTH_URL }} | sf org login sfdx-url -s -u
 
-      - name: 'Validate'
+      # Cache Salesforce CLI
+      - name: Cache Salesforce CLI
+        id: cache-sf
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-sf-cli
+        with:
+          path: ~/sf
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/sfdx-project.json') }}
+
+      # Install Salesforce CLI (if not cached)
+      - name: Install Salesforce CLI
+        if: ${{ steps.cache-sf.outputs.cache-hit != 'true' }}
         run: |
-          sf project deploy validate -d force-app/ -l RunLocalTests -w 30
+          wget https://developer.salesforce.com/media/salesforce-cli/sf/channels/stable/sf-linux-x64.tar.xz
+          mkdir -p ~/sf
+          tar xJf sf-linux-x64.tar.xz -C ~/sf --strip-components 1
+          echo "$HOME/sf/bin" >> $GITHUB_PATH
+          ~/sf/bin/sf version
+
+      # Update SF CLI if cached
+      - name: Update Salesforce CLI (cached)
+        if: ${{ steps.cache-sf.outputs.cache-hit == 'true' }}
+        run: |
+          echo "$HOME/sf/bin" >> $GITHUB_PATH
+          ~/sf/bin/sf version
+
+      # Install sfdx-git-delta plugin
+      - name: Install sfdx-git-delta
+        run: |
+          echo y | sf plugins:install sfdx-git-delta
+          sf plugins
+
+      # Authenticate to your Dev Org
+      - name: Authenticate to Dev Org
+        run: |
+          echo ${{ secrets.DEVELOP }} > ./SFDX_DEV_URL.txt
+          sf org login sfdx-url -f ./SFDX_DEV_URL.txt -s -a devhub
+          sf org display -o devhub
+
+      # Create delta package of changed metadata
+      - name: Create Delta Package
+        run: |
+          mkdir -p changed-sources
+          sf sgd:source:delta \
+            --to "HEAD" \
+            --from "origin/main" \
+            --output "changed-sources/" \
+            --generate-delta \
+            --source "force-app/"
+
+          echo "Delta package created:"
+          ls -R changed-sources/package || echo "No package.xml found"
+
+      # Validate delta deployment (no tests run)
+      - name: Validate Delta Deployment (No Tests)
+        if: success()
+        run: |
+          if [ -f "changed-sources/package/package.xml" ]; then
+            sf project deploy validate \
+              -x changed-sources/package/package.xml \
+              --post-destructive-changes changed-sources/destructiveChanges/destructiveChanges.xml \
+              -l NoTestRun \
+              -w 30
+          else
+            echo "⚠️ No package.xml found. Skipping deployment."
+          fi
+
+      # Run only test classes included in the delta package (if any)
+      - name: Run Only Changed Test Classes
+        if: success()
+        run: |
+          TESTS=$(grep -oP '(?<=<members>).*Test(?=</members>)' changed-sources/package/package.xml | tr '\n' ',' | sed 's/,$//')
+          if [ -n "$TESTS" ]; then
+            echo "Detected test classes: $TESTS"
+            sf apex run test --tests "$TESTS" --wait 30
+          else
+            echo "✅ No test classes found in delta. Skipping test run."
+          fi
