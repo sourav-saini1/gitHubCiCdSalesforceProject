@@ -7,48 +7,7 @@ on:
     types: [opened, synchronize]
     paths:
       - 'force-app/**'
-
-jobs:
-  validate-deployment:
-    runs-on: ubuntu-latest
-    container:
-      image: salesforce/cli:latest-slim
-    steps:      
-      - name: 'Checkout source code'
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       
-      - name: 'Authenticate using SFDX_AUTH_URL'
-        run: | 
-          echo ${{ secrets.SFDX_AUTH_URL }} | sf org login sfdx-url -s -u
-
-      - name: 'Install sfdx-git-delta'
-        run: |
-          sf plugins install sfdx-git-delta --force
-          sf plugins
-
-            - name: "Create delta packages for new, modified or deleted metadata"
-              run: |
-                  mkdir changed-sources
-                  sf sgd:source:delta --to "HEAD" --from "HEAD^" --output changed-sources/ --generate-delta --source force-app/
-          
-          echo "✅ Delta package created:"
-          ls -R changed-sources/package || echo "⚠️ No package.xml found."
-
-      - name: 'Validate'
-        run: |
-          if [ -f "changed-sources/package/package.xml" ]; then
-            echo "🚀 Validating only changed metadata..."
-            sf project deploy validate \
-              -x changed-sources/package/package.xml \
-              -l RunLocalTests \
-              -w 30
-          else
-            echo "✅ No Salesforce changes detected, skipping validation."
-          fi
-
-
 # Jobs to be executed when the above conditions are met
 jobs:
     # This is the name of the job. You can give it whatever name you want
@@ -171,3 +130,4 @@ jobs:
 
             # - name: 'Deploy destructive changes (if any)'
             #  run: sfdx force:mdapi:deploy -d "changed-sources/destructiveChanges" --checkonly --ignorewarnings
+
