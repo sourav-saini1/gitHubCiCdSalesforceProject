@@ -55,8 +55,8 @@ jobs:
       # Authenticate to your Dev Org
       - name: Authenticate to Dev Org
         run: |
-          echo ${{ secrets.DEVELOP }} > ./SFDX_DEV_URL.txt
-          sf org login sfdx-url -f ./SFDX_DEV_URL.txt -s -a devhub
+          echo ${{ secrets.DEVELOP }} > ./SFDX_AUTH_URL.txt
+          sf org login sfdx-url -f ./SFDX_AUTH_URL.txt -s -a devhub
           sf org display -o devhub
 
       # Create delta package of changed metadata
@@ -98,3 +98,4 @@ jobs:
           else
             echo "✅ No test classes found in delta. Skipping test run."
           fi
+
