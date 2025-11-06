@@ -5,6 +5,7 @@
 
 public with sharing class AccountNumberOfEmployeesComparator implements Comparator<Account> {
     public Integer compare(Account a1, Account a2) {
+        System.debug(a1);
         Integer compareResulT;
         // Handle null objects before null field values
         if (a1 == null && a2 == null) {
