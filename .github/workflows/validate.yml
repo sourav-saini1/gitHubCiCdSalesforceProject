@@ -3,7 +3,7 @@ name: Validate to Develop Branch
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-    branches: [dev]
+    branches: [main]
     paths:
       - "force-app/**"
 
@@ -98,3 +98,4 @@ jobs:
           else
             echo "✅ No test classes found in delta. Skipping test run."
           fi
+
